@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CaseQalam — Password Badlen</title>
+<style>
+  body{font-family:system-ui,Arial,sans-serif;background:#f7f1e3;margin:0;padding:24px;color:#2b2118;}
+  .card{max-width:420px;margin:40px auto;background:#fff;border:1px solid #d8c491;border-radius:14px;padding:24px;box-shadow:0 4px 18px rgba(90,50,0,.12);}
+  h1{font-size:21px;color:#6d1420;margin:0 0 6px;}
+  p{font-size:15px;line-height:1.55;}
+  label{display:block;font-weight:600;margin:14px 0 6px;font-size:14px;}
+  input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #c9b98a;border-radius:9px;font-size:16px;}
+  button{width:100%;margin-top:18px;padding:13px;border:0;border-radius:9px;background:#6d1420;color:#fff;font-size:16px;font-weight:700;cursor:pointer;}
+  .ok{background:#e7f4e4;border:1px solid #9dc98f;padding:12px;border-radius:9px;}
+  .warn{background:#fdecec;border:1px solid #e0a3a3;padding:12px;border-radius:9px;}
+  .mut{color:#7a6a55;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>CaseQalam — Lawyer Diary</h1>
+  <p class="mut">Password badalne wala page</p>
+  <div id="main"><p>Link check ho raha hai...</p></div>
+</div>
+<script>
+var SUPA = "https://ehvsusyemleonjfuoilk.supabase.co";
+var ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVodnN1c3llbWxlb25qZnVvaWxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ2MjkyODAsImV4cCI6MjExMDIwNTI4MH0.zYnc5S-O9wxJc_kH8WxE0-qvBNTteILGGqRd8RVGDsE";
+function params(){
+  var h = location.hash.replace(/^#/, ""), out = {};
+  h.split("&").forEach(function(kv){ var i = kv.indexOf("="); if(i>0) out[decodeURIComponent(kv.slice(0,i))] = decodeURIComponent(kv.slice(i+1)); });
+  return out;
+}
+var p = params(), main = document.getElementById("main");
+if(p.access_token && (p.type === "recovery" || p.type === "magiclink")){
+  main.innerHTML = '<p>Apna <b>naya password</b> likhen — yehi aap ka CaseQalam account ka naya password hoga.</p>' +
+    '<label>Naya Password (kam az kam 6)</label><input id="np1" type="password">' +
+    '<label>Password Dobara Likhen</label><input id="np2" type="password">' +
+    '<button id="go">Password Badal Dein</button><div id="msg" style="margin-top:14px;"></div>';
+  document.getElementById("go").onclick = function(){
+    var a = document.getElementById("np1").value, b = document.getElementById("np2").value, msg = document.getElementById("msg");
+    if(a.length < 6){ msg.innerHTML = '<div class="warn">Password kam az kam 6 characters ka rakhen.</div>'; return; }
+    if(a !== b){ msg.innerHTML = '<div class="warn">Dono password aik jaisay nahi hain.</div>'; return; }
+    msg.innerHTML = "<p>Badla ja raha hai...</p>";
+    fetch(SUPA + "/auth/v1/user", {method:"PUT", headers:{"apikey":ANON, "Authorization":"Bearer " + p.access_token, "Content-Type":"application/json"}, body: JSON.stringify({password:a})})
+    .then(function(r){ return r.json().then(function(j){ return {ok:r.ok, j:j}; }); })
+    .then(function(x){
+      if(x.ok){ main.innerHTML = '<div class="ok"><b>Password badal gaya!</b><br>Ab CaseQalam app khol kar naye password se login karen.</div>'; }
+      else { msg.innerHTML = '<div class="warn">Password nahi badla — link purana ho sakta hai. App mein Forgot Password se naya link mangwayen.</div>'; }
+    })
+    .catch(function(){ msg.innerHTML = '<div class="warn">Internet ka masla — dobara koshish karen.</div>'; });
+  };
+} else {
+  main.innerHTML = '<div class="warn">Ye link durust nahi ya purana hai.</div><p>CaseQalam app kholen, login wali screen par <b>"Password bhool gaye?"</b> dabayen aur apna Gmail likhen — naya link aap ke Gmail par chala jayega.</p>';
+}
+</script>
+</body>
+</html>
